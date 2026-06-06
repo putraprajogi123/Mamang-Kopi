@@ -72,6 +72,31 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .empty{text-align:center;color:var(--muted);padding:30px;font-size:14px}
   .err{background:rgba(227,103,47,.12);border:1px solid var(--accent);color:var(--accent2);border-radius:11px;padding:11px;font-size:14px;margin-top:12px;display:none}
+
+  /* navigasi tab */
+  .nav{display:flex;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:16px}
+  .nav button{flex:1;background:none;border:none;color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;padding:9px;border-radius:9px;cursor:pointer}
+  .nav button.active{background:var(--accent);color:#fff}
+
+  /* katalog */
+  .cat-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+  .cat-item .nm{font-weight:600;font-size:15px}
+  .cat-item .pr{font-size:13px;color:var(--gold)}
+  .cat-item .arsip{font-size:11px;color:var(--muted)}
+
+  /* setup */
+  .row2{display:flex;gap:10px}
+  .row2>div{flex:1}
+  .pick{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:10px}
+  .pick .top{display:flex;align-items:center;gap:10px}
+  .pick .top input[type=checkbox]{width:20px;height:20px;flex-shrink:0}
+  .pick .top .nm{font-weight:600;flex:1}
+  .pick .fields{display:none;gap:10px;margin-top:11px}
+  .pick.on .fields{display:flex}
+  .pick .fields>div{flex:1}
+  .titik-row{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:10px;position:relative}
+  .titik-row .del{position:absolute;top:10px;right:10px;background:none;border:none;color:#e08a8a;font-size:18px;cursor:pointer}
+  .ok-msg{background:rgba(111,174,111,.12);border:1px solid var(--ok);color:var(--ok);border-radius:11px;padding:12px;font-size:14px;margin-top:12px;display:none}
 </style>
 </head>
 <body>
@@ -96,7 +121,11 @@
       <h1 class="display">Pesanan</h1>
       <span class="tag" id="lbl-tgl"></span>
     </div>
-
+    <div class="nav">
+      <button class="active" onclick="goTab('orders',this)">Pesanan</button>
+      <button onclick="goTab('setup',this)">Setup</button>
+      <button onclick="goTab('katalog',this)">Katalog</button>
+    </div>
     <div class="selbar">
       <select id="sel-sesi"></select>
       <button class="btn sm ghost" id="btn-reload" style="margin:0">↻</button>
@@ -110,6 +139,66 @@
 
     <div id="orders-loading" class="loading" style="display:none"><div class="spinner"></div>Memuat pesanan…</div>
     <div id="orders-list"></div>
+  </div>
+
+  <!-- KATALOG -->
+  <div class="screen" id="s-katalog">
+    <div class="topbar"><h1 class="display">Katalog</h1><span class="tag">Menu</span></div>
+    <div class="nav">
+      <button onclick="goTab('orders',this)">Pesanan</button>
+      <button onclick="goTab('setup',this)">Setup</button>
+      <button class="active" onclick="goTab('katalog',this)">Katalog</button>
+    </div>
+    <div id="katalog-list"></div>
+    <div class="card" style="margin-top:8px">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:17px">Tambah / Ubah Menu</div>
+      <input type="hidden" id="cat-id">
+      <label class="label">Nama menu</label>
+      <input id="cat-nama" placeholder="mis. Kopi Susu Gula Aren">
+      <div class="row2">
+        <div><label class="label">Harga normal</label><input id="cat-harga" type="number" inputmode="numeric" placeholder="15000"></div>
+        <div><label class="label">Status</label>
+          <select id="cat-aktif"><option value="TRUE">Aktif</option><option value="FALSE">Arsip</option></select></div>
+      </div>
+      <div class="err" id="err-cat"></div>
+      <div class="ok-msg" id="ok-cat">Tersimpan.</div>
+      <button class="btn" id="btn-simpan-menu">Simpan Menu</button>
+      <button class="btn ghost" id="btn-cat-reset">Kosongkan form</button>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="screen" id="s-setup">
+    <div class="topbar"><h1 class="display">Setup Harian</h1><span class="tag">Sesi</span></div>
+    <div class="nav">
+      <button onclick="goTab('orders',this)">Pesanan</button>
+      <button class="active" onclick="goTab('setup',this)">Setup</button>
+      <button onclick="goTab('katalog',this)">Katalog</button>
+    </div>
+    <div class="card">
+      <label class="label">Tanggal jualan</label>
+      <input id="set-tanggal" type="date">
+      <div class="row2">
+        <div><label class="label">Buka langganan</label><input id="set-bl" type="time"></div>
+        <div><label class="label">Buka umum</label><input id="set-bu" type="time"></div>
+      </div>
+      <div class="row2">
+        <div><label class="label">Batas tutup</label><input id="set-bt" type="time"></div>
+        <div><label class="label">Status</label>
+          <select id="set-status"><option value="draft">Draft</option><option value="buka">Buka</option></select></div>
+      </div>
+
+      <label class="label" style="margin-top:18px">Menu yang dijual</label>
+      <div id="set-menu-list"></div>
+
+      <label class="label" style="margin-top:18px">Titik antar</label>
+      <div id="set-titik-list"></div>
+      <button class="btn ghost" id="btn-add-titik" style="margin-top:0">+ Tambah titik</button>
+
+      <div class="err" id="err-setup"></div>
+      <div class="ok-msg" id="ok-setup">Sesi berhasil dipublikasikan.</div>
+      <button class="btn" id="btn-publish">Publikasikan</button>
+    </div>
   </div>
 
 </div>
@@ -236,6 +325,130 @@
       })
       .catch(function(){ alert('Gagal mengirim. Periksa koneksi.'); if(btn){btn.disabled=false;} });
   };
+  // ====== NAVIGASI TAB ======
+  window.goTab = function(tab, btn){
+    if(tab==='orders'){ show('s-orders'); loadOrders(); }
+    else if(tab==='setup'){ show('s-setup'); initSetup(); }
+    else if(tab==='katalog'){ show('s-katalog'); loadKatalog(); }
+  };
+
+  // ====== KATALOG ======
+  function loadKatalog(){
+    fetch(API+"?action=getKatalog").then(function(r){return r.json()}).then(function(d){
+      if(!d.ok){ $('katalog-list').innerHTML='<div class="empty">Gagal memuat.</div>'; return; }
+      d.menu.forEach(function(m){ st.menuMap[m.id]=m.nama; });
+      var html='';
+      d.menu.forEach(function(m){
+        var arsip = String(m.aktif).toLowerCase()!=='true';
+        html += '<div class="cat-item"><div><div class="nm">'+m.nama+(arsip?' <span class="arsip">(arsip)</span>':'')+'</div>'+
+          '<div class="pr">'+rupiah(m.harga)+'</div></div>'+
+          '<button class="btn sm ghost" style="margin:0" onclick="editMenu(\''+m.id+'\',\''+encodeURIComponent(m.nama)+'\','+m.harga+',\''+m.aktif+'\')">Ubah</button></div>';
+      });
+      $('katalog-list').innerHTML = html || '<div class="empty">Belum ada menu.</div>';
+    });
+  }
+
+  window.editMenu = function(id,nama,harga,aktif){
+    $('cat-id').value=id; $('cat-nama').value=decodeURIComponent(nama);
+    $('cat-harga').value=harga; $('cat-aktif').value=String(aktif).toLowerCase()==='true'?'TRUE':'FALSE';
+    $('s-katalog').scrollIntoView({behavior:'smooth',block:'end'});
+  };
+  $('btn-cat-reset').onclick = function(){ $('cat-id').value=''; $('cat-nama').value=''; $('cat-harga').value=''; $('cat-aktif').value='TRUE'; };
+
+  $('btn-simpan-menu').onclick = function(){
+    $('err-cat').style.display='none'; $('ok-cat').style.display='none';
+    var nama=$('cat-nama').value.trim(), harga=$('cat-harga').value;
+    if(!nama){ $('err-cat').textContent='Nama menu wajib diisi.'; $('err-cat').style.display='block'; return; }
+    var payload={ action:"simpanMenu", nama:nama, harga:Number(harga)||0, aktif:$('cat-aktif').value };
+    if($('cat-id').value) payload.id=$('cat-id').value;
+    var btn=this; btn.disabled=true; btn.textContent='Menyimpan…';
+    fetch(API,{method:"POST",body:JSON.stringify(payload)}).then(function(r){return r.json()}).then(function(d){
+      btn.disabled=false; btn.textContent='Simpan Menu';
+      if(d.ok){ $('ok-cat').style.display='block'; $('btn-cat-reset').click(); loadKatalog(); }
+      else { $('err-cat').textContent='Gagal: '+d.error; $('err-cat').style.display='block'; }
+    }).catch(function(){ btn.disabled=false; btn.textContent='Simpan Menu'; $('err-cat').textContent='Gagal mengirim.'; $('err-cat').style.display='block'; });
+  };
+
+  // ====== SETUP ======
+  var setupReady=false;
+  function initSetup(){
+    if(setupReady) return;
+    // default tanggal = besok
+    var bsk=new Date(); bsk.setDate(bsk.getDate()+1);
+    $('set-tanggal').value = bsk.toISOString().slice(0,10);
+    // muat menu aktif dari katalog
+    fetch(API+"?action=getKatalog").then(function(r){return r.json()}).then(function(d){
+      if(d.ok){
+        var html='';
+        d.menu.filter(function(m){return String(m.aktif).toLowerCase()==='true'}).forEach(function(m){
+          html += '<div class="pick" id="pick-'+m.id+'">'+
+            '<div class="top"><input type="checkbox" onchange="togglePick(\''+m.id+'\')"><span class="nm">'+m.nama+'</span></div>'+
+            '<div class="fields"><div><label class="label" style="margin-top:0">Harga hari ini</label>'+
+              '<input type="number" inputmode="numeric" id="ph-'+m.id+'" value="'+m.harga+'"></div>'+
+              '<div><label class="label" style="margin-top:0">Kuota</label>'+
+              '<input type="number" inputmode="numeric" id="kt-'+m.id+'" placeholder="10"></div></div></div>';
+        });
+        $('set-menu-list').innerHTML = html || '<div class="empty">Belum ada menu aktif. Tambah di Katalog dulu.</div>';
+      }
+    });
+    addTitikRow(); // satu baris titik default
+    setupReady=true;
+  }
+
+  window.togglePick = function(id){ $('pick-'+id).classList.toggle('on'); };
+
+  var titikCount=0;
+  function addTitikRow(){
+    titikCount++;
+    var div=document.createElement('div'); div.className='titik-row'; div.id='tr-'+titikCount;
+    div.innerHTML = '<button class="del" onclick="delTitik('+titikCount+')">✕</button>'+
+      '<label class="label" style="margin-top:0">Nama titik</label><input class="tt-nama" placeholder="Kantor Kebun">'+
+      '<div class="row2"><div><label class="label">Patokan</label><input class="tt-patokan" placeholder="Depan pos satpam"></div>'+
+      '<div><label class="label">Jam antar</label><input class="tt-jam" type="time"></div></div>';
+    $('set-titik-list').appendChild(div);
+  }
+  window.delTitik = function(n){ var el=$('tr-'+n); if(el) el.remove(); };
+  $('btn-add-titik').onclick = addTitikRow;
+
+  $('btn-publish').onclick = function(){
+    $('err-setup').style.display='none'; $('ok-setup').style.display='none';
+    var tanggal=$('set-tanggal').value;
+    if(!tanggal){ showSetupErr('Tanggal wajib diisi.'); return; }
+    // konversi tanggal yyyy-mm-dd -> dd/mm/yyyy (samakan dengan format backend)
+    var pr=tanggal.split('-'); var tglFmt=pr[2]+'/'+pr[1]+'/'+pr[0];
+
+    // menu terpilih
+    var menu=[];
+    document.querySelectorAll('.pick.on').forEach(function(p){
+      var id=p.id.replace('pick-','');
+      menu.push({ menu_id:id, harga_hari_ini:Number($('ph-'+id).value)||0, kuota_menu:Number($('kt-'+id).value)||0 });
+    });
+    if(!menu.length){ showSetupErr('Pilih minimal satu menu.'); return; }
+
+    // titik
+    var titik=[], idx=0;
+    document.querySelectorAll('.titik-row').forEach(function(tr){
+      var nama=tr.querySelector('.tt-nama').value.trim();
+      if(nama){ idx++; titik.push({ nama_titik:nama, patokan:tr.querySelector('.tt-patokan').value.trim(),
+        waktu_antar:tr.querySelector('.tt-jam').value||'', urutan:idx }); }
+    });
+    if(!titik.length){ showSetupErr('Tambah minimal satu titik antar.'); return; }
+
+    var kuotaTotal=0; menu.forEach(function(m){ kuotaTotal+=m.kuota_menu; });
+    var payload={ action:"setupSesi", tanggal:tglFmt, kuota_total:kuotaTotal,
+      buka_langganan:$('set-bl').value||'', buka_umum:$('set-bu').value||'', batas_tutup:$('set-bt').value||'',
+      status:$('set-status').value, menu:menu, titik:titik };
+
+    var btn=this; btn.disabled=true; btn.textContent='Mempublikasikan…';
+    fetch(API,{method:"POST",body:JSON.stringify(payload)}).then(function(r){return r.json()}).then(function(d){
+      btn.disabled=false; btn.textContent='Publikasikan';
+      if(d.ok){ $('ok-setup').style.display='block'; }
+      else if(d.error==='sesi sudah punya pesanan, tidak bisa diubah'){ showSetupErr('Sesi tanggal ini sudah ada pesanan — tidak bisa diubah. Ubah manual di Sheets bila perlu.'); }
+      else { showSetupErr('Gagal: '+d.error); }
+    }).catch(function(){ btn.disabled=false; btn.textContent='Publikasikan'; showSetupErr('Gagal mengirim. Periksa koneksi.'); });
+  };
+  function showSetupErr(m){ $('err-setup').textContent=m; $('err-setup').style.display='block'; }
+
 </script>
 </body>
 </html>

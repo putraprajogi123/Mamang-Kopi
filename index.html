@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kopi Pre-Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1410; --card:#241c16; --card2:#2e241c;
+    --cream:#f4ece1; --muted:#b8a894; --line:#3a2e24;
+    --accent:#e3672f; --accent2:#f0944e; --gold:#d8a85b;
+    --ok:#6fae6f; --warn:#d8a85b;
+    --shadow:0 10px 40px rgba(0,0,0,.45);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Outfit',sans-serif;background:var(--bg);color:var(--cream);
+    min-height:100vh;line-height:1.5;
+    background-image:radial-gradient(circle at 20% 0%,rgba(227,103,47,.08),transparent 40%),radial-gradient(circle at 90% 100%,rgba(216,168,91,.06),transparent 45%);
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:20px 18px 40px;min-height:100vh}
+  .display{font-family:'Fraunces',serif}
+  .screen{display:none;animation:fade .4s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .brand{text-align:center;margin:18px 0 26px}
+  .brand .cup{font-size:40px;margin-bottom:6px}
+  .brand h1{font-family:'Fraunces',serif;font-weight:900;font-size:30px;letter-spacing:-.5px}
+  .brand p{color:var(--muted);font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+  .label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:500}
+  input,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px;color:var(--cream);font-family:inherit;font-size:15px;outline:none;transition:border .2s}
+  input:focus,textarea:focus{border-color:var(--accent)}
+  textarea{resize:vertical;min-height:60px}
+
+  .btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;
+    border-radius:14px;padding:15px;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;
+    margin-top:20px;transition:transform .15s,box-shadow .2s;box-shadow:0 6px 20px rgba(227,103,47,.3)}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);box-shadow:none;margin-top:12px}
+  .btn.wa{background:linear-gradient(135deg,#25a35a,#2cc06b);box-shadow:0 6px 20px rgba(44,192,107,.3)}
+
+  .status-bar{display:flex;align-items:center;justify-content:space-between;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:18px}
+  .status-bar .open{font-weight:600;color:var(--ok);font-size:15px}
+  .status-bar .closed{font-weight:600;color:var(--warn);font-size:15px}
+  .quota{text-align:right}
+  .quota .num{font-family:'Fraunces',serif;font-weight:900;font-size:26px;line-height:1;color:var(--accent2)}
+  .quota .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+  .sec-title{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin:6px 2px 14px}
+
+  .menu-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:14px;margin-bottom:12px}
+  .menu-item .thumb{width:54px;height:54px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--card2),var(--line));display:flex;align-items:center;justify-content:center;font-size:24px}
+  .menu-item .info{flex:1;min-width:0}
+  .menu-item .info .nm{font-weight:600;font-size:15px}
+  .menu-item .info .pr{color:var(--gold);font-size:14px;margin-top:2px}
+  .stepper{display:flex;align-items:center;gap:0;background:var(--card2);border-radius:10px;border:1px solid var(--line)}
+  .stepper button{width:34px;height:34px;background:none;border:none;color:var(--cream);font-size:18px;cursor:pointer;font-family:inherit}
+  .stepper button:active{color:var(--accent)}
+  .stepper .q{width:28px;text-align:center;font-weight:600;font-size:15px}
+
+  .titik{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:11px;cursor:pointer;transition:border .2s,background .2s}
+  .titik.sel{border-color:var(--accent);background:var(--card2)}
+  .titik .tn{font-weight:600;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+  .titik .tn .time{color:var(--accent2);font-size:14px;font-family:'Fraunces',serif;font-weight:600}
+  .titik .tp{color:var(--muted);font-size:13px;margin-top:3px}
+
+  .summary{background:var(--card2);border-radius:14px;padding:16px;margin-top:8px}
+  .summary .row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;color:var(--muted)}
+  .summary .row.total{color:var(--cream);font-weight:600;font-size:17px;border-top:1px solid var(--line);margin-top:8px;padding-top:12px}
+  .summary .row.total .v{font-family:'Fraunces',serif;color:var(--accent2)}
+
+  .qrbox{text-align:center;padding:10px 0}
+  .qr-ph{width:200px;height:200px;margin:14px auto;border-radius:16px;background:#fff;
+    display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;text-align:center;padding:20px;border:2px dashed #ccc}
+  .ordercode{font-family:'Fraunces',serif;font-weight:900;font-size:32px;letter-spacing:3px;color:var(--accent2);margin:6px 0}
+  .pill{display:inline-block;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;margin-top:6px}
+  .pill.wait{background:rgba(216,168,91,.15);color:var(--gold)}
+  .pill.paid{background:rgba(111,174,111,.15);color:var(--ok)}
+
+  .steps{display:flex;justify-content:space-between;margin:20px 0 10px;position:relative}
+  .steps::before{content:'';position:absolute;top:11px;left:10%;right:10%;height:2px;background:var(--line)}
+  .step{text-align:center;z-index:1;flex:1}
+  .step .dot{width:24px;height:24px;border-radius:50%;background:var(--card2);border:2px solid var(--line);
+    margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .step.done .dot{background:var(--ok);border-color:var(--ok)}
+  .step.now .dot{background:var(--accent);border-color:var(--accent)}
+  .step .t{font-size:10px;color:var(--muted)}
+  .step.done .t,.step.now .t{color:var(--cream)}
+
+  .note{font-size:13px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+  .loading{text-align:center;padding:40px;color:var(--muted)}
+  .spinner{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;
+    margin:0 auto 12px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .err{background:rgba(227,103,47,.12);border:1px solid var(--accent);color:var(--accent2);
+    border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <div class="cup">☕</div>
+    <h1 class="display">Kopi Harian</h1>
+    <p>Pre-Order • Terbatas</p>
+  </div>
+
+  <!-- LAYAR 1: MASUK -->
+  <div class="screen active" id="s-login">
+    <div class="card">
+      <div class="sec-title">Selamat datang</div>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:4px">Masukkan data untuk mulai memesan.</p>
+      <label class="label">Nama</label>
+      <input id="in-nama" placeholder="Nama kamu" autocomplete="name">
+      <label class="label">Nomor HP / WhatsApp</label>
+      <input id="in-hp" placeholder="0812xxxxxxxx" inputmode="numeric" autocomplete="tel">
+      <button class="btn" id="btn-login">Lanjut</button>
+    </div>
+  </div>
+
+  <!-- LAYAR 2: MENU -->
+  <div class="screen" id="s-menu">
+    <div id="menu-loading" class="loading"><div class="spinner"></div>Memuat menu hari ini…</div>
+    <div id="menu-content" style="display:none">
+      <div class="status-bar">
+        <div><div id="open-label" class="open">PRE-ORDER DIBUKA</div>
+          <div style="font-size:12px;color:var(--muted)" id="tgl-label"></div></div>
+        <div class="quota"><div class="num" id="sisa-num">–</div><div class="lbl">cup tersisa</div></div>
+      </div>
+      <div class="sec-title">Menu Hari Ini</div>
+      <div id="menu-list"></div>
+      <button class="btn" id="btn-to-titik" disabled>Lanjut Pilih Titik</button>
+    </div>
+  </div>
+
+  <!-- LAYAR 3: TITIK + CATATAN -->
+  <div class="screen" id="s-titik">
+    <div class="sec-title">Pilih Titik Antar</div>
+    <div id="titik-list"></div>
+    <label class="label">Catatan (opsional)</label>
+    <textarea id="in-catatan" placeholder="Contoh: titip ke satpam"></textarea>
+    <div class="summary" id="sum-titik"></div>
+    <div class="err" id="err-titik"></div>
+    <button class="btn" id="btn-pesan">Pesan &amp; Bayar</button>
+    <button class="btn ghost" id="btn-back-menu">← Kembali ke menu</button>
+  </div>
+
+  <!-- LAYAR 4: PEMBAYARAN -->
+  <div class="screen" id="s-bayar">
+    <div class="card qrbox">
+      <div class="sec-title" style="text-align:center">Pembayaran</div>
+      <div style="font-size:13px;color:var(--muted)">Kode Pesanan</div>
+      <div class="ordercode" id="kode-qr">––––</div>
+      <div class="qr-ph">Scan QRIS di sini<br>(placeholder — ganti<br>dengan QRIS milikmu)</div>
+      <div class="summary"><div class="row total"><span>Total Bayar</span><span class="v" id="bayar-total">Rp 0</span></div></div>
+      <div class="pill wait">Menunggu konfirmasi pembayaran</div>
+      <button class="btn wa" id="btn-wa">Kirim Bukti via WhatsApp</button>
+      <button class="btn ghost" id="btn-to-status">Lihat status pesanan →</button>
+      <div class="note">Setelah transfer, kirim bukti via WhatsApp.<br>Pesanan diproses setelah pembayaran dikonfirmasi.</div>
+    </div>
+  </div>
+
+  <!-- LAYAR 5: STATUS -->
+  <div class="screen" id="s-status">
+    <div class="card qrbox">
+      <div class="sec-title" style="text-align:center">Pesanan Kamu</div>
+      <div style="font-size:13px;color:var(--muted)">Tunjukkan kode ini saat ambil</div>
+      <div class="ordercode" id="st-kode">––––</div>
+      <div class="steps" id="st-steps"></div>
+      <div id="st-pill"></div>
+      <button class="btn ghost" id="btn-refresh">↻ Perbarui status</button>
+      <button class="btn" id="btn-again">Pesan lagi</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ====== KONFIGURASI ======
+  var API = "https://script.google.com/macros/s/AKfycbx4t3ddJrZEno3HYaKry3q_gFq_hGn4-tlOAFTxc7kp-DMcack-V2-ibP2KY9532S8PSA/exec";
+  var WA_OWNER = "628xxxxxxxxxx"; // GANTI dengan nomor WhatsApp kamu (format 62...)
+
+  // ====== STATE ======
+  var state = { nama:"", hp:"", sesi:null, qty:{}, titikSel:null, pesananId:null, kodeQr:null, total:0 };
+
+  // ====== UTIL ======
+  function $(id){return document.getElementById(id)}
+  function show(scr){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});$(scr).classList.add('active');window.scrollTo(0,0)}
+  function rupiah(n){return "Rp "+(Number(n)||0).toLocaleString('id-ID')}
+
+  // ====== LOGIN ======
+  (function initLogin(){
+    var savedN = localStorage.getItem('kopi_nama'), savedH = localStorage.getItem('kopi_hp');
+    if(savedN) $('in-nama').value = savedN;
+    if(savedH) $('in-hp').value = savedH;
+  })();
+
+  $('btn-login').onclick = function(){
+    var nama = $('in-nama').value.trim(), hp = $('in-hp').value.trim();
+    if(!nama || !hp){ alert('Mohon isi nama dan nomor HP.'); return; }
+    state.nama = nama; state.hp = hp;
+    localStorage.setItem('kopi_nama', nama); localStorage.setItem('kopi_hp', hp);
+    show('s-menu'); loadMenu();
+  };
+
+  // ====== LOAD MENU (GET) ======
+  function loadMenu(){
+    $('menu-loading').style.display='block'; $('menu-content').style.display='none';
+    fetch(API + "?action=getMenuHariIni")
+      .then(function(r){return r.json()})
+      .then(function(d){
+        $('menu-loading').style.display='none'; $('menu-content').style.display='block';
+        if(!d.ok || !d.buka){
+          $('open-label').textContent='BELUM ADA SESI'; $('open-label').className='closed';
+          $('sisa-num').textContent='0'; $('menu-list').innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Belum ada pre-order dibuka hari ini. Cek lagi nanti ya.</p>';
+          $('btn-to-titik').disabled=true; return;
+        }
+        state.sesi = d;
+        $('tgl-label').textContent = d.tanggal || '';
+        $('sisa-num').textContent = d.sisa;
+        renderMenu(d.menu);
+      })
+      .catch(function(e){
+        $('menu-loading').innerHTML='<p style="color:var(--accent2)">Gagal memuat. Periksa koneksi & coba lagi.</p>';
+      });
+  }
+
+  function renderMenu(menu){
+    var html='';
+    menu.forEach(function(m){
+      if(state.qty[m.menu_id]===undefined) state.qty[m.menu_id]=0;
+      html += '<div class="menu-item">'+
+        '<div class="thumb">☕</div>'+
+        '<div class="info"><div class="nm">'+m.nama+'</div><div class="pr">'+rupiah(m.harga)+'</div></div>'+
+        '<div class="stepper">'+
+          '<button onclick="chQty(\''+m.menu_id+'\',-1)">−</button>'+
+          '<span class="q" id="q-'+m.menu_id+'">0</span>'+
+          '<button onclick="chQty(\''+m.menu_id+'\',1)">+</button>'+
+        '</div></div>';
+    });
+    $('menu-list').innerHTML = html;
+    updateMenuBtn();
+  }
+
+  window.chQty = function(id, delta){
+    var cur = state.qty[id] || 0;
+    var totalNow = totalCup();
+    if(delta>0 && totalNow >= state.sesi.sisa){ alert('Maaf, melebihi sisa kuota ('+state.sesi.sisa+' cup).'); return; }
+    cur = Math.max(0, cur + delta);
+    state.qty[id] = cur;
+    $('q-'+id).textContent = cur;
+    updateMenuBtn();
+  };
+
+  function totalCup(){ var t=0; for(var k in state.qty) t+=state.qty[k]; return t; }
+  function updateMenuBtn(){ $('btn-to-titik').disabled = totalCup()<=0; }
+
+  $('btn-to-titik').onclick = function(){ renderTitik(); show('s-titik'); };
+
+  // ====== TITIK ======
+  function renderTitik(){
+    var html='';
+    state.sesi.titik.forEach(function(t){
+      var sel = state.titikSel===t.id ? ' sel':'';
+      html += '<div class="titik'+sel+'" id="tk-'+t.id+'" onclick="selTitik(\''+t.id+'\')">'+
+        '<div class="tn"><span>'+t.nama_titik+'</span><span class="time">'+t.waktu_antar+'</span></div>'+
+        '<div class="tp">'+(t.patokan||'')+'</div></div>';
+    });
+    $('titik-list').innerHTML = html;
+    renderSummary();
+  }
+
+  window.selTitik = function(id){
+    state.titikSel = id;
+    document.querySelectorAll('.titik').forEach(function(el){el.classList.remove('sel')});
+    $('tk-'+id).classList.add('sel');
+  };
+
+  function renderSummary(){
+    var rows='', total=0;
+    state.sesi.menu.forEach(function(m){
+      var q = state.qty[m.menu_id]||0;
+      if(q>0){ var sub=q*m.harga; total+=sub;
+        rows += '<div class="row"><span>'+m.nama+' × '+q+'</span><span>'+rupiah(sub)+'</span></div>'; }
+    });
+    state.total = total;
+    rows += '<div class="row total"><span>Total</span><span class="v">'+rupiah(total)+'</span></div>';
+    $('sum-titik').innerHTML = rows;
+  }
+
+  $('btn-back-menu').onclick = function(){ show('s-menu'); };
+
+  // ====== BUAT PESANAN (POST - Cara A) ======
+  $('btn-pesan').onclick = function(){
+    $('err-titik').style.display='none';
+    if(!state.titikSel){ showErr('Pilih titik antar dulu ya.'); return; }
+    var items=[];
+    state.sesi.menu.forEach(function(m){ var q=state.qty[m.menu_id]||0; if(q>0) items.push({menu_id:m.menu_id,jumlah:q}); });
+    if(items.length===0){ showErr('Belum ada item dipilih.'); return; }
+
+    var btn=$('btn-pesan'); btn.disabled=true; btn.textContent='Memproses…';
+    var payload = { action:"buatPesanan", no_hp:state.hp, nama:state.nama,
+      sesi_id:state.sesi.sesi_id, titik_id:state.titikSel, items:items, catatan:$('in-catatan').value.trim() };
+
+    fetch(API, { method:"POST", body:JSON.stringify(payload) })
+      .then(function(r){return r.json()})
+      .then(function(d){
+        btn.disabled=false; btn.textContent='Pesan & Bayar';
+        if(!d.ok){ showErr(d.error==='kuota tidak cukup' ? 'Maaf, kuota tidak cukup (sisa '+d.sisa+').' : ('Gagal: '+d.error)); return; }
+        state.pesananId=d.pesanan_id; state.kodeQr=d.kode_qr; state.total=d.total_bayar;
+        $('kode-qr').textContent=d.kode_qr; $('bayar-total').textContent=rupiah(d.total_bayar);
+        show('s-bayar');
+      })
+      .catch(function(e){
+        btn.disabled=false; btn.textContent='Pesan & Bayar';
+        showErr('Gagal mengirim pesanan. Periksa koneksi & coba lagi.');
+      });
+  };
+  function showErr(msg){ $('err-titik').textContent=msg; $('err-titik').style.display='block'; }
+
+  // ====== PEMBAYARAN ======
+  $('btn-wa').onclick = function(){
+    var msg = "Halo, saya mau kirim bukti pembayaran.%0A"+
+      "Kode Pesanan: "+state.kodeQr+"%0A"+
+      "Nama: "+state.nama+"%0A"+
+      "Total: "+rupiah(state.total)+"%0A"+
+      "(mohon lampirkan screenshot bukti transfer)";
+    window.open("https://wa.me/"+WA_OWNER+"?text="+msg, "_blank");
+  };
+  $('btn-to-status').onclick = function(){ renderStatus('menunggu_konfirmasi'); show('s-status'); };
+
+  // ====== STATUS ======
+  var STEPS = [
+    {key:'menunggu_konfirmasi', label:'Menunggu'},
+    {key:'dibayar', label:'Dibayar'},
+    {key:'siap', label:'Siap'},
+    {key:'selesai', label:'Selesai'}
+  ];
+  function renderStatus(status){
+    $('st-kode').textContent = state.kodeQr || '––––';
+    var idx = STEPS.findIndex(function(s){return s.key===status});
+    if(status==='batal') idx=-1;
+    var html='';
+    STEPS.forEach(function(s,i){
+      var cls = i<idx ? 'done' : (i===idx ? 'now' : '');
+      html += '<div class="step '+cls+'"><div class="dot">'+(i<idx?'✓':(i+1))+'</div><div class="t">'+s.label+'</div></div>';
+    });
+    $('st-steps').innerHTML = html;
+    var pill = status==='batal'
+      ? '<div class="pill wait" style="background:rgba(227,103,47,.15);color:var(--accent2)">Pesanan dibatalkan</div>'
+      : (idx>=1 ? '<div class="pill paid">Pembayaran dikonfirmasi</div>' : '<div class="pill wait">Menunggu konfirmasi pembayaran</div>');
+    $('st-pill').innerHTML = pill;
+  }
+
+  $('btn-refresh').onclick = function(){
+    if(!state.pesananId) return;
+    var btn=$('btn-refresh'); btn.textContent='Memperbarui…';
+    fetch(API + "?action=getStatusPesanan&pesanan_id="+encodeURIComponent(state.pesananId))
+      .then(function(r){return r.json()})
+      .then(function(d){ btn.textContent='↻ Perbarui status'; if(d.ok) renderStatus(d.status); })
+      .catch(function(){ btn.textContent='↻ Perbarui status'; });
+  };
+
+  $('btn-again').onclick = function(){
+    state.qty={}; state.titikSel=null; state.pesananId=null; state.kodeQr=null; state.total=0;
+    $('in-catatan').value='';
+    show('s-menu'); loadMenu();
+  };
+</script>
+</body>
+</html>

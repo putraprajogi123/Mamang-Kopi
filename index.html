@@ -189,7 +189,7 @@
 <script>
   // ====== KONFIGURASI ======
   var API = "https://script.google.com/macros/s/AKfycbx4t3ddJrZEno3HYaKry3q_gFq_hGn4-tlOAFTxc7kp-DMcack-V2-ibP2KY9532S8PSA/exec";
-  var WA_OWNER = "6282161333555"; // GANTI dengan nomor WhatsApp kamu (format 62...)
+  var WA_OWNER = "628xxxxxxxxxx"; // GANTI dengan nomor WhatsApp kamu (format 62...)
 
   // ====== STATE ======
   var state = { nama:"", hp:"", sesi:null, qty:{}, titikSel:null, pesananId:null, kodeQr:null, total:0 };
@@ -236,18 +236,38 @@
       });
   }
 
+  // Ambil ulang data sisa (dipakai saat pesanan gagal karena keburu habis) tanpa pindah layar
+  function loadMenuRefresh(){
+    fetch(API + "?action=getMenuHariIni")
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(d.ok && d.buka){ state.sesi=d; if(state.sisaMenu){ d.menu.forEach(function(m){ state.sisaMenu[m.menu_id]=m.sisa; }); } }
+      }).catch(function(){});
+  }
+
   function renderMenu(menu){
+    state.sisaMenu = {}; // simpan sisa per menu untuk validasi stepper
     var html='';
     menu.forEach(function(m){
       if(state.qty[m.menu_id]===undefined) state.qty[m.menu_id]=0;
-      html += '<div class="menu-item">'+
-        '<div class="thumb">☕</div>'+
-        '<div class="info"><div class="nm">'+m.nama+'</div><div class="pr">'+rupiah(m.harga)+'</div></div>'+
-        '<div class="stepper">'+
-          '<button onclick="chQty(\''+m.menu_id+'\',-1)">−</button>'+
-          '<span class="q" id="q-'+m.menu_id+'">0</span>'+
-          '<button onclick="chQty(\''+m.menu_id+'\',1)">+</button>'+
-        '</div></div>';
+      state.sisaMenu[m.menu_id] = m.sisa;
+      var habis = (Number(m.sisa)||0) <= 0;
+      if(habis){
+        html += '<div class="menu-item" style="opacity:.55">'+
+          '<div class="thumb">☕</div>'+
+          '<div class="info"><div class="nm">'+m.nama+'</div><div class="pr">'+rupiah(m.harga)+'</div></div>'+
+          '<span class="pill wait" style="margin:0">Habis</span></div>';
+      } else {
+        html += '<div class="menu-item">'+
+          '<div class="thumb">☕</div>'+
+          '<div class="info"><div class="nm">'+m.nama+'</div><div class="pr">'+rupiah(m.harga)+'</div>'+
+            '<div style="font-size:12px;color:var(--muted);margin-top:2px">sisa '+m.sisa+' cup</div></div>'+
+          '<div class="stepper">'+
+            '<button onclick="chQty(\''+m.menu_id+'\',-1)">−</button>'+
+            '<span class="q" id="q-'+m.menu_id+'">'+state.qty[m.menu_id]+'</span>'+
+            '<button onclick="chQty(\''+m.menu_id+'\',1)">+</button>'+
+          '</div></div>';
+      }
     });
     $('menu-list').innerHTML = html;
     updateMenuBtn();
@@ -255,8 +275,8 @@
 
   window.chQty = function(id, delta){
     var cur = state.qty[id] || 0;
-    var totalNow = totalCup();
-    if(delta>0 && totalNow >= state.sesi.sisa){ alert('Maaf, melebihi sisa kuota ('+state.sesi.sisa+' cup).'); return; }
+    var sisaM = (state.sisaMenu && state.sisaMenu[id] != null) ? Number(state.sisaMenu[id]) : 0;
+    if(delta>0 && cur >= sisaM){ alert('Maaf, sisa menu ini hanya '+sisaM+' cup.'); return; }
     cur = Math.max(0, cur + delta);
     state.qty[id] = cur;
     $('q-'+id).textContent = cur;
@@ -317,7 +337,13 @@
       .then(function(r){return r.json()})
       .then(function(d){
         btn.disabled=false; btn.textContent='Pesan & Bayar';
-        if(!d.ok){ showErr(d.error==='kuota tidak cukup' ? 'Maaf, kuota tidak cukup (sisa '+d.sisa+').' : ('Gagal: '+d.error)); return; }
+        if(!d.ok){
+          var msg;
+          if(d.error==='kuota menu tidak cukup'){ msg='Maaf, '+d.menu+' tinggal '+d.sisa_menu+' cup.'; }
+          else if(d.error==='kuota tidak cukup'){ msg='Maaf, kuota tidak cukup (sisa '+d.sisa+').'; }
+          else { msg='Gagal: '+d.error; }
+          showErr(msg); loadMenuRefresh(); return;
+        }
         state.pesananId=d.pesanan_id; state.kodeQr=d.kode_qr; state.total=d.total_bayar;
         $('kode-qr').textContent=d.kode_qr; $('bayar-total').textContent=rupiah(d.total_bayar);
         show('s-bayar');

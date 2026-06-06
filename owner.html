@@ -370,17 +370,20 @@
   };
 
   // ====== SETUP ======
-  var setupReady=false;
+  var setupTitikInit=false;
   function initSetup(){
-    if(setupReady) return;
-    // default tanggal = besok
-    var bsk=new Date(); bsk.setDate(bsk.getDate()+1);
-    $('set-tanggal').value = bsk.toISOString().slice(0,10);
-    // muat menu aktif dari katalog
+    // default tanggal = besok (set sekali kalau masih kosong)
+    if(!$('set-tanggal').value){
+      var bsk=new Date(); bsk.setDate(bsk.getDate()+1);
+      $('set-tanggal').value = bsk.toISOString().slice(0,10);
+    }
+    // SELALU muat ulang menu aktif dari katalog (agar menu baru ikut muncul)
+    $('set-menu-list').innerHTML = '<div class="loading"><div class="spinner"></div>Memuat menu…</div>';
     fetch(API+"?action=getKatalog").then(function(r){return r.json()}).then(function(d){
       if(d.ok){
+        var aktif = d.menu.filter(function(m){ return String(m.aktif).toLowerCase()==='true'; });
         var html='';
-        d.menu.filter(function(m){return String(m.aktif).toLowerCase()==='true'}).forEach(function(m){
+        aktif.forEach(function(m){
           html += '<div class="pick" id="pick-'+m.id+'">'+
             '<div class="top"><input type="checkbox" onchange="togglePick(\''+m.id+'\')"><span class="nm">'+m.nama+'</span></div>'+
             '<div class="fields"><div><label class="label" style="margin-top:0">Harga hari ini</label>'+
@@ -389,10 +392,14 @@
               '<input type="number" inputmode="numeric" id="kt-'+m.id+'" placeholder="10"></div></div></div>';
         });
         $('set-menu-list').innerHTML = html || '<div class="empty">Belum ada menu aktif. Tambah di Katalog dulu.</div>';
+      } else {
+        $('set-menu-list').innerHTML = '<div class="empty">Gagal memuat menu. Coba buka tab ini lagi.</div>';
       }
+    }).catch(function(){
+      $('set-menu-list').innerHTML = '<div class="empty">Gagal memuat menu. Periksa koneksi.</div>';
     });
-    addTitikRow(); // satu baris titik default
-    setupReady=true;
+    // baris titik default hanya sekali
+    if(!setupTitikInit){ addTitikRow(); setupTitikInit=true; }
   }
 
   window.togglePick = function(id){ $('pick-'+id).classList.toggle('on'); };
